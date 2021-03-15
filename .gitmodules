@@ -1,0 +1,3 @@
+[submodule "reactivities_client"]
+	path = reactivities_client
+	url = https://github.com/ygordantas/reactivities_client
