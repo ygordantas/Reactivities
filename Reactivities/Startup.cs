@@ -26,6 +26,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Infrastructure.Security;
+using Application.Interfaces;
 
 namespace Reactivities
 {
@@ -51,6 +53,9 @@ namespace Reactivities
             {
                 config.RegisterValidatorsFromAssemblyContaining<Create>();
             });
+
+            // Application service extensions
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Reactivities", Version = "v1" });
@@ -68,6 +73,9 @@ namespace Reactivities
             });
             services.AddMediatR(typeof(List.Handler).Assembly);
             services.AddAutoMapper(typeof(MappingProfiles).Assembly);
+            services.AddScoped<IUserAccessor, UserAccessor>();
+
+            //----
 
             //Identity services
 
@@ -89,6 +97,14 @@ namespace Reactivities
                 };
             });
 
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("IsActivityHost", policy =>
+                {
+                    policy.Requirements.Add(new IsHostRequirement());
+                });
+            });
+            services.AddTransient<IAuthorizationHandler, IsHostRequirementHandler>();
             services.AddScoped<TokenService>();
 
             //--
